@@ -13,3 +13,6 @@ test-cov:
 
 test:
 	 go test  ./...
+
+build:
+	go build -o ./bin/link-service
