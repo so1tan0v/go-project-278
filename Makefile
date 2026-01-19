@@ -15,4 +15,4 @@ test:
 	 go test  ./...
 
 build:
-	go build -o ./bin/link-service
+	go build -o ./bin/app
