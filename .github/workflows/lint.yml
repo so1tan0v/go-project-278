@@ -21,6 +21,17 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version: stable
+
+      - name: Restore cached Primes
+        id: cache-primes-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            path/to/dependencies
+            some/other/dependencies
+          key: ${{ runner.os }}-primes
+
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
