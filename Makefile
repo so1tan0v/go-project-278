@@ -16,3 +16,9 @@ test:
 
 build:
 	go build -o ./bin/app
+
+docker-build:
+	docker build -t go-project-278 .
+
+docker-run:
+	docker run -d --rm -p 8080:8080 --env-file ./.env go-project-278
