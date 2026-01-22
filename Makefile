@@ -15,7 +15,7 @@ test:
 	 go test  ./...
 
 build:
-	go build -o ./bin/app
+	go build -o ./build/app
 
 docker-build:
 	docker build -t go-project-278 .

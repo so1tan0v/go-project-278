@@ -2,5 +2,4 @@
 .env
 /tmp
 coverage.xml
-/bin/
-!/bin/.gitkeep
+/build
