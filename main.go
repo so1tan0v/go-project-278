@@ -19,7 +19,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if cnf.Development {
+	if cnf.App.Development {
 		httpServer.Use(gin.Recovery())
 
 		jsonData, _ := json.Marshal(cnf)

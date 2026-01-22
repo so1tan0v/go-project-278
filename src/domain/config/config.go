@@ -1,20 +1,26 @@
 package configDomain
 
-const (
-	LoggingIo   = "LOGGING_IO"
-	Development = "DEVELOPMENT"
-	Port        = "PORT"
-	Host        = "HOST"
-)
-
 type IConfig interface {
 	Init(envPath string) (Config, error)
 	load(envPath string)
 }
 
-type Config struct {
+type AppConfig struct {
 	Development bool
 	Port        int
 	Host        string
 	LoggingIO   bool
+}
+
+type DatabaseConfig struct {
+	Host     string
+	Port     int
+	Database string
+	Username string
+	Password string
+}
+
+type Config struct {
+	App      AppConfig
+	Database DatabaseConfig
 }
