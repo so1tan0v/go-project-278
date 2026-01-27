@@ -9,30 +9,36 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func Init(envPath string) (configDomain.Config, error) {
+func Init(envPath string) (*configDomain.Config, error) {
+	// Для локальной разработки полезно подгружать переменные из .env.
+	// В продакшене переменные окружения должны быть заданы извне.
 	if envPath != "" {
 		if err := load(envPath); err != nil {
-			return configDomain.Config{}, err
+			return nil, err
 		}
+	} else {
+		// Игнорируем ошибку, если файла нет.
+		_ = godotenv.Load()
 	}
 
 	appConfig := initAppConfig()
 	dbConfig, err := initDatabaseConfig()
 	if err != nil {
-		return configDomain.Config{}, err
+		return nil, err
 	}
 
-	return configDomain.Config{
-		App:      appConfig,
-		Database: dbConfig,
+	return &configDomain.Config{
+		App:      *appConfig,
+		Database: *dbConfig,
 	}, nil
 }
 
-func initAppConfig() configDomain.AppConfig {
+func initAppConfig() *configDomain.AppConfig {
 	var development bool
 	var host string
 	var port int
 	var loggingIO bool
+	var baseURL string
 
 	development = os.Getenv("DEVELOPMENT") == "true"
 	host = os.Getenv("HOST")
@@ -41,47 +47,35 @@ func initAppConfig() configDomain.AppConfig {
 	}
 
 	port, _ = strconv.Atoi(os.Getenv("PORT"))
+	if port == 0 {
+		port = 8080
+	}
 	loggingIO = os.Getenv("LOGGING_IO") == "true"
 
-	return configDomain.AppConfig{
+	return &configDomain.AppConfig{
 		Development: development,
 		Port:        port,
 		Host:        host,
 		LoggingIO:   loggingIO,
+		BaseURL: func() string {
+			baseURL = os.Getenv("BASE_URL")
+			if baseURL != "" {
+				return baseURL
+			}
+			// Дефолт удобен для локальной разработки.
+			return fmt.Sprintf("http://%s:%d", host, port)
+		}(),
 	}
 }
 
-func initDatabaseConfig() (configDomain.DatabaseConfig, error) {
-	var host string
-	var port int
-	var user string
-	var password string
-	var database string
-
-	host = os.Getenv("DB_HOST")
-	if host == "" {
-		host = "localhost"
+func initDatabaseConfig() (*configDomain.DatabaseConfig, error) {
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
+		return nil, fmt.Errorf("DATABASE_URL environment variable not set")
 	}
 
-	port, _ = strconv.Atoi(os.Getenv("DB_PORT"))
-	if port == 0 {
-		port = 5432
-	}
-	user = os.Getenv("DB_USER")
-	if user == "" {
-		return configDomain.DatabaseConfig{}, fmt.Errorf("DB_USER environment variable not set")
-	}
-	password = os.Getenv("DB_PASSWORD")
-	if password == "" {
-		return configDomain.DatabaseConfig{}, fmt.Errorf("DB_PASSWORD environment variable not set")
-	}
-
-	return configDomain.DatabaseConfig{
-		Database: database,
-		Host:     host,
-		Port:     port,
-		Username: user,
-		Password: password,
+	return &configDomain.DatabaseConfig{
+		URL: databaseURL,
 	}, nil
 }
 

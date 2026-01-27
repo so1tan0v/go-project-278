@@ -6,11 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitRoutes(router *gin.Engine) {
-	initGetHandlers(router)
-}
-
-func initGetHandlers(router *gin.Engine) {
+func RegisterRoutes(router *gin.Engine) {
 	router.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
