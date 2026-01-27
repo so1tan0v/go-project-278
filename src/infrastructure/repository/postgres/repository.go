@@ -12,9 +12,9 @@ import (
 	"link-service/src/infrastructure/database/sqlcdb"
 )
 
-// Repository — инфраструктурная реализация domain.Repository (PostgreSQL + sqlc).
+/*Репозиторий для работы с PostgreSQL*/
 type Repository struct {
-	q *sqlcdb.Queries
+	q *sqlcdb.Queries /*Queries для работы с базой данных*/
 }
 
 /*Метод создания нового репозитория*/
@@ -118,7 +118,6 @@ func isUniqueViolation(err error) bool {
 	var pgErr *pgconn.PgError
 
 	if errors.As(err, &pgErr) {
-		// 23505 — unique_violation
 		return pgErr.Code == "23505"
 	}
 

@@ -9,15 +9,13 @@ import (
 	"github.com/joho/godotenv"
 )
 
+/*Метод инициализации конфигурации*/
 func Init(envPath string) (*configDomain.Config, error) {
-	// Для локальной разработки полезно подгружать переменные из .env.
-	// В продакшене переменные окружения должны быть заданы извне.
 	if envPath != "" {
 		if err := load(envPath); err != nil {
 			return nil, err
 		}
 	} else {
-		// Игнорируем ошибку, если файла нет.
 		_ = godotenv.Load()
 	}
 
@@ -33,6 +31,7 @@ func Init(envPath string) (*configDomain.Config, error) {
 	}, nil
 }
 
+/*Метод инициализации конфигурации приложения*/
 func initAppConfig() *configDomain.AppConfig {
 	var development bool
 	var host string
@@ -62,12 +61,13 @@ func initAppConfig() *configDomain.AppConfig {
 			if baseURL != "" {
 				return baseURL
 			}
-			// Дефолт удобен для локальной разработки.
+
 			return fmt.Sprintf("http://%s:%d", host, port)
 		}(),
 	}
 }
 
+/*Метод инициализации конфигурации базы данных*/
 func initDatabaseConfig() (*configDomain.DatabaseConfig, error) {
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
@@ -79,6 +79,7 @@ func initDatabaseConfig() (*configDomain.DatabaseConfig, error) {
 	}, nil
 }
 
+/*Метод загрузки переменных окружения*/
 func load(envPath string) error {
 	err := godotenv.Load(envPath)
 	if err != nil {

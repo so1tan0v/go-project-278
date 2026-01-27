@@ -41,7 +41,7 @@ func (d *DatabaseImpl) Connect(config configDomain.DatabaseConfig) error {
 }
 
 /*Метод получения экземпляра базы данных*/
-func (d *DatabaseImpl) GetInstance() any { // *sql.DB
+func (d *DatabaseImpl) GetInstance() any {
 	return d.instance
 }
 
