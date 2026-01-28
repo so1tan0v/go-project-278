@@ -1,10 +1,29 @@
 -- name: ListLinks :many
-SELECT id, original_url, short_name, created_at
+SELECT 
+  id, 
+  original_url, 
+  short_name, 
+  created_at
 FROM links
 ORDER BY id;
 
+
+-- name: ListLinksWithRange :many
+SELECT 
+  id, 
+  original_url, 
+  short_name, 
+  created_at
+FROM links
+ORDER BY id
+LIMIT $1 OFFSET $2;
+
 -- name: GetLink :one
-SELECT id, original_url, short_name, created_at
+SELECT 
+  id, 
+  original_url, 
+  short_name, 
+  created_at
 FROM links
 WHERE id = $1;
 

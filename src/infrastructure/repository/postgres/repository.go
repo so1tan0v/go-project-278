@@ -37,6 +37,24 @@ func (r *Repository) List(ctx context.Context) ([]entity.Link, error) {
 	return res, nil
 }
 
+/*Метод получения списка ссылок*/
+func (r *Repository) ListWithRange(ctx context.Context, rng *domain.Range) ([]entity.Link, error) {
+	rows, err := r.q.ListLinksWithRange(ctx, sqlcdb.ListLinksWithRangeParams{
+		Limit:  int32(rng.End - rng.Start),
+		Offset: int32(rng.Start),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]entity.Link, 0, len(rows))
+	for _, row := range rows {
+		res = append(res, fromSQLC(row))
+	}
+
+	return res, nil
+}
+
 /*Метод получения ссылки по идентификатору*/
 func (r *Repository) Get(ctx context.Context, id int64) (entity.Link, error) {
 	row, err := r.q.GetLink(ctx, id)

@@ -96,6 +96,46 @@ func (q *Queries) ListLinks(ctx context.Context) ([]Link, error) {
 	return items, nil
 }
 
+const listLinksWithRange = `-- name: ListLinksWithRange :many
+SELECT id, original_url, short_name, created_at
+FROM links
+ORDER BY id
+LIMIT $1 OFFSET $2
+`
+
+type ListLinksWithRangeParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListLinksWithRange(ctx context.Context, arg ListLinksWithRangeParams) ([]Link, error) {
+	rows, err := q.db.QueryContext(ctx, listLinksWithRange, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Link
+	for rows.Next() {
+		var i Link
+		if err := rows.Scan(
+			&i.ID,
+			&i.OriginalUrl,
+			&i.ShortName,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateLink = `-- name: UpdateLink :one
 UPDATE links
 SET original_url = $2,

@@ -2,12 +2,15 @@ package linkusecase
 
 import (
 	"context"
+	"link-service/src/domain/link"
 )
 
 /*Интерфейс для работы с ссылками*/
 type UseCase interface {
 	/*Метод получения списка ссылок*/
 	List(ctx context.Context) ([]LinkDTO, error)
+	/*Список ссылок с range*/
+	ListWithRange(ctx context.Context, rng *link.Range) ([]LinkDTO, error)
 	/*Метод получения ссылки по идентификатору*/
 	Get(ctx context.Context, id int64) (LinkDTO, error)
 	/*Метод создания новой ссылки*/

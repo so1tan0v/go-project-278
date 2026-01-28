@@ -1,9 +1,13 @@
 package link
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
+	"link-service/src/domain/link"
 	linkusecase "link-service/src/usecase/link"
 
 	"github.com/gin-gonic/gin"
@@ -21,10 +25,30 @@ func NewHandler(useCase linkusecase.UseCase) *Handler {
 
 /*Метод получения списка ссылок*/
 func (h *Handler) List(c *gin.Context) {
-	res, err := h.useCase.List(c.Request.Context())
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
-		return
+	var rng *link.Range
+	var res []linkusecase.LinkDTO
+	var err error
+
+	rngString := c.Query("range")
+	if rngString != "" {
+		rng, err = parseRange(rngString)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid range header"})
+
+			return
+		}
+
+		res, err = h.useCase.ListWithRange(c.Request.Context(), rng)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+			return
+		}
+	} else {
+		res, err = h.useCase.List(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+			return
+		}
 	}
 
 	response := make([]LinkResponse, 0, len(res))
@@ -37,6 +61,8 @@ func (h *Handler) List(c *gin.Context) {
 
 /*Метод получения ссылки по идентификатору*/
 func (h *Handler) Get(c *gin.Context) {
+	fmt.Println("Get", c.Param("id"))
+
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil || id <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
@@ -159,4 +185,38 @@ func mapToResponse(l linkusecase.LinkDTO) LinkResponse {
 		ShortName:   l.ShortName,
 		ShortURL:    l.ShortURL,
 	}
+}
+
+/*Паргинг range из строки ([0, 5] || 5) в int*/
+func parseRange(strRange string) (*link.Range, error) {
+	var start, end int
+	var err error
+
+	strRange = strings.Trim(strRange, "[]")
+
+	if !strings.HasPrefix(strRange, "[") {
+		end, err = strconv.Atoi(strRange)
+		if err != nil {
+			return nil, errors.New("invalid range header")
+		}
+
+		return &link.Range{Start: start, End: end}, nil
+	}
+
+	parts := strings.Split(strRange, ",")
+	if len(parts) != 2 {
+		return nil, errors.New("invalid range header")
+	}
+
+	start, err = strconv.Atoi(parts[0])
+	if err != nil {
+		return nil, errors.New("invalid range header")
+	}
+
+	end, err = strconv.Atoi(parts[1])
+	if err != nil {
+		return nil, errors.New("invalid range header")
+	}
+
+	return &link.Range{Start: start, End: end}, nil
 }

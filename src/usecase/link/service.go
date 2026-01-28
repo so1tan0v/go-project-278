@@ -41,6 +41,21 @@ func (s *Service) List(ctx context.Context) ([]LinkDTO, error) {
 	return res, nil
 }
 
+/*Метод получения списка ссылок*/
+func (s *Service) ListWithRange(ctx context.Context, rng *domain.Range) ([]LinkDTO, error) {
+	links, err := s.repo.ListWithRange(ctx, rng)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]LinkDTO, 0, len(links))
+	for _, l := range links {
+		res = append(res, s.toDTO(l))
+	}
+
+	return res, nil
+}
+
 /*Метод получения ссылки по идентификатору*/
 func (s *Service) Get(ctx context.Context, id int64) (LinkDTO, error) {
 	l, err := s.repo.Get(ctx, id)
