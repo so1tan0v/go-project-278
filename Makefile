@@ -7,9 +7,7 @@ DB_TYPE=postgres
 # Default DATABASE_URL if not set in environment
 DATABASE_URL ?= "postgres://user:password@localhost:5432/link_service?sslmode=disable"
 
-.PHONY: all build clean run test test-cov run-dev generate-config sqlc migrate-up migrate-down migrate-status migrate-create help
-
-all: build
+.PHONY: build clean run test test-cov run-dev generate-config sqlc migrate-up migrate-down migrate-status migrate-create help
 
 ## Build targets
 build:
