@@ -2,7 +2,7 @@
 FROM node:24-alpine AS frontend-builder
 WORKDIR /build/frontend
 
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
 RUN --mount=type=cache,target=/root/.npm \
   npm ci --prefer-offline --no-audit
