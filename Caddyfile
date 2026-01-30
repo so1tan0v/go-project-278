@@ -1,4 +1,8 @@
-:80
+{
+    admin off
+}
+
+:{$PORT:80}
 
 # Статика из /app/public
 root * /app/public
