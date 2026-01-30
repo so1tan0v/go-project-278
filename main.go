@@ -17,6 +17,7 @@ import (
 	postgreslinkrepo "link-service/src/infrastructure/repository/postgres"
 	httpinterface "link-service/src/interface/http"
 	linkusecase "link-service/src/usecase/link"
+	linkvisitusecase "link-service/src/usecase/linkvisit"
 )
 
 func main() {
@@ -62,6 +63,9 @@ func main() {
 	linkRepo := postgreslinkrepo.New(sqlDB)
 	linkService := linkusecase.NewService(linkRepo, cnf.App.BaseURL)
 
+	linkVisitRepo := postgreslinkrepo.NewLinkVisitRepository(sqlDB)
+	linkVisitService := linkvisitusecase.NewService(linkVisitRepo)
+
 	if cnf.App.Development {
 		httpServer.Use(gin.Recovery())
 
@@ -71,7 +75,8 @@ func main() {
 	}
 
 	httpinterface.InitRoutes(httpServer, httpinterface.Deps{
-		Link: linkService,
+		Link:      linkService,
+		LinkVisit: linkVisitService,
 	})
 
 	if err := httpServer.Run(fmt.Sprintf("%s:%d", cnf.App.Host, cnf.App.Port)); err != nil {

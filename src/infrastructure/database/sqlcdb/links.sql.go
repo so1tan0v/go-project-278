@@ -9,6 +9,17 @@ import (
 	"context"
 )
 
+const countLinks = `-- name: CountLinks :one
+SELECT COUNT(*) FROM links
+`
+
+func (q *Queries) CountLinks(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countLinks)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createLink = `-- name: CreateLink :one
 INSERT INTO links (original_url, short_name)
 VALUES ($1, $2)
@@ -52,6 +63,24 @@ WHERE id = $1
 
 func (q *Queries) GetLink(ctx context.Context, id int64) (Link, error) {
 	row := q.db.QueryRowContext(ctx, getLink, id)
+	var i Link
+	err := row.Scan(
+		&i.ID,
+		&i.OriginalUrl,
+		&i.ShortName,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getLinkByShortName = `-- name: GetLinkByShortName :one
+SELECT id, original_url, short_name, created_at
+FROM links
+WHERE short_name = $1
+`
+
+func (q *Queries) GetLinkByShortName(ctx context.Context, shortName string) (Link, error) {
+	row := q.db.QueryRowContext(ctx, getLinkByShortName, shortName)
 	var i Link
 	err := row.Scan(
 		&i.ID,

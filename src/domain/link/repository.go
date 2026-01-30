@@ -16,6 +16,8 @@ type Repository interface {
 	Count(ctx context.Context) (int64, error)
 	/*Получение ссылки по идентификатору*/
 	Get(ctx context.Context, id int64) (entity.Link, error)
+	/*Получение ссылки по short_name*/
+	GetByShortName(ctx context.Context, shortName string) (entity.Link, error)
 	/*Создание ссылки*/
 	Create(ctx context.Context, originalURL, shortName string) (entity.Link, error)
 	/*Обновление ссылки*/

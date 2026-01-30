@@ -70,6 +70,15 @@ func (s *Service) Get(ctx context.Context, id int64) (LinkDTO, error) {
 	return s.toDTO(l), nil
 }
 
+/*Метод получения ссылки по short_name*/
+func (s *Service) GetByShortName(ctx context.Context, shortName string) (LinkDTO, error) {
+	l, err := s.repo.GetByShortName(ctx, shortName)
+	if err != nil {
+		return LinkDTO{}, mapDomainError(err)
+	}
+	return s.toDTO(l), nil
+}
+
 /*Метод создания новой ссылки*/
 func (s *Service) Create(ctx context.Context, in CreateInput) (LinkDTO, error) {
 	if err := validateOriginalURL(in.OriginalURL); err != nil {

@@ -14,16 +14,12 @@ import (
 
 /*Репозиторий для работы с PostgreSQL*/
 type Repository struct {
-	db *sql.DB
 	q *sqlcdb.Queries /*Queries для работы с базой данных*/
 }
 
 /*Метод создания нового репозитория*/
 func New(db *sql.DB) *Repository {
-	return &Repository{
-		db: db,
-		q:  sqlcdb.New(db),
-	}
+	return &Repository{q: sqlcdb.New(db)}
 }
 
 /*Метод получения списка ссылок*/
@@ -61,17 +57,26 @@ func (r *Repository) ListWithRange(ctx context.Context, rng *domain.Range) ([]en
 
 /*Метод получения общего количества ссылок*/
 func (r *Repository) Count(ctx context.Context) (int64, error) {
-	var total int64
-	if err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM links`).Scan(&total); err != nil {
-		return 0, err
-	}
-	return total, nil
+	return r.q.CountLinks(ctx)
 }
 
 /*Метод получения ссылки по идентификатору*/
 func (r *Repository) Get(ctx context.Context, id int64) (entity.Link, error) {
 	row, err := r.q.GetLink(ctx, id)
 
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return entity.Link{}, domain.ErrNotFound
+		}
+		return entity.Link{}, err
+	}
+
+	return fromSQLC(row), nil
+}
+
+/*Метод получения ссылки по short_name*/
+func (r *Repository) GetByShortName(ctx context.Context, shortName string) (entity.Link, error) {
+	row, err := r.q.GetLinkByShortName(ctx, shortName)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return entity.Link{}, domain.ErrNotFound

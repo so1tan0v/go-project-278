@@ -9,12 +9,18 @@ import (
 )
 
 type Querier interface {
+	CountLinks(ctx context.Context) (int64, error)
 	CreateLink(ctx context.Context, arg CreateLinkParams) (Link, error)
 	DeleteLink(ctx context.Context, id int64) (int64, error)
 	GetLink(ctx context.Context, id int64) (Link, error)
+	GetLinkByShortName(ctx context.Context, shortName string) (Link, error)
 	ListLinks(ctx context.Context) ([]Link, error)
 	ListLinksWithRange(ctx context.Context, arg ListLinksWithRangeParams) ([]Link, error)
 	UpdateLink(ctx context.Context, arg UpdateLinkParams) (Link, error)
+
+	CountLinkVisits(ctx context.Context) (int64, error)
+	CreateLinkVisit(ctx context.Context, arg CreateLinkVisitParams) (LinkVisit, error)
+	ListLinkVisitsWithRange(ctx context.Context, arg ListLinkVisitsWithRangeParams) ([]LinkVisit, error)
 }
 
 var _ Querier = (*Queries)(nil)

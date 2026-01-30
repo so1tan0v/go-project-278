@@ -15,6 +15,8 @@ type UseCase interface {
 	Count(ctx context.Context) (int64, error)
 	/*Метод получения ссылки по идентификатору*/
 	Get(ctx context.Context, id int64) (LinkDTO, error)
+	/*Метод получения ссылки по short_name*/
+	GetByShortName(ctx context.Context, shortName string) (LinkDTO, error)
 	/*Метод создания новой ссылки*/
 	Create(ctx context.Context, in CreateInput) (LinkDTO, error)
 	/*Метод обновления ссылки*/

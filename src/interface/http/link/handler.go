@@ -1,11 +1,9 @@
 package link
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"link-service/src/domain/link"
 	linkusecase "link-service/src/usecase/link"
@@ -31,7 +29,7 @@ func (h *Handler) List(c *gin.Context) {
 
 	rngString := c.Query("range")
 	if rngString != "" {
-		rng, err = parseRange(rngString)
+		rng, err = link.ParseRange(rngString)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 
@@ -201,49 +199,4 @@ func mapToResponse(l linkusecase.LinkDTO) LinkResponse {
 		ShortName:   l.ShortName,
 		ShortURL:    l.ShortURL,
 	}
-}
-
-/*Паргинг range из строки ([0, 5] || 5) в int*/
-func parseRange(strRange string) (*link.Range, error) {
-	var start, end int
-	var err error
-
-	strRange = strings.Trim(strRange, "")
-	strRange = strings.ReplaceAll(strRange, " ", "")
-
-	if !strings.HasPrefix(strRange, "[") {
-		end, err = strconv.Atoi(strRange)
-		if err != nil {
-			return nil, errors.New("invalid range header")
-		}
-
-		if end < start {
-			return nil, errors.New("invalid range header (end < start)")
-		}
-		return &link.Range{Start: start, End: end}, nil
-	}
-
-	strRange = strings.ReplaceAll(strRange, "[", "")
-	strRange = strings.ReplaceAll(strRange, "]", "")
-
-	parts := strings.Split(strRange, ",")
-
-	if len(parts) != 2 {
-		return nil, errors.New("invalid range header (len part)")
-	}
-
-	start, err = strconv.Atoi(parts[0])
-	if err != nil {
-		return nil, errors.New("invalid range header (atoi part one)")
-	}
-
-	end, err = strconv.Atoi(parts[1])
-	if err != nil {
-		return nil, errors.New("invalid range header (atoi part two)")
-	}
-
-	if end < start {
-		return nil, errors.New("invalid range header (end < start)")
-	}
-	return &link.Range{Start: start, End: end}, nil
 }
