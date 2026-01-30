@@ -1,0 +1,11 @@
+{
+  "name": "go-project-278",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/so1tan0v/go-project-278.git"
+  },
+  "dependencies": {
+    "@hexlet/project-url-shortener-frontend": "^1.0.0"
+  }
+}
