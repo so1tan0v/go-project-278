@@ -11,6 +11,8 @@ type UseCase interface {
 	List(ctx context.Context) ([]LinkDTO, error)
 	/*Список ссылок с range*/
 	ListWithRange(ctx context.Context, rng *link.Range) ([]LinkDTO, error)
+	/*Общее количество ссылок*/
+	Count(ctx context.Context) (int64, error)
 	/*Метод получения ссылки по идентификатору*/
 	Get(ctx context.Context, id int64) (LinkDTO, error)
 	/*Метод создания новой ссылки*/

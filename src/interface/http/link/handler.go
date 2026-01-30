@@ -33,7 +33,7 @@ func (h *Handler) List(c *gin.Context) {
 	if rngString != "" {
 		rng, err = parseRange(rngString)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid range header"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 
 			return
 		}
@@ -55,6 +55,22 @@ func (h *Handler) List(c *gin.Context) {
 	for _, l := range res {
 		response = append(response, mapToResponse(l))
 	}
+
+	total, err := h.useCase.Count(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		return
+	}
+
+	start := 0
+	if rng != nil {
+		start = rng.Start
+	}
+	end := start + len(response) - 1
+	if len(response) == 0 {
+		end = start
+	}
+	c.Header("Content-Range", fmt.Sprintf("links %d-%d/%d", start, end, total))
 
 	c.JSON(http.StatusOK, response)
 }
@@ -192,7 +208,8 @@ func parseRange(strRange string) (*link.Range, error) {
 	var start, end int
 	var err error
 
-	strRange = strings.Trim(strRange, "[]")
+	strRange = strings.Trim(strRange, "")
+	strRange = strings.ReplaceAll(strRange, " ", "")
 
 	if !strings.HasPrefix(strRange, "[") {
 		end, err = strconv.Atoi(strRange)
@@ -200,23 +217,33 @@ func parseRange(strRange string) (*link.Range, error) {
 			return nil, errors.New("invalid range header")
 		}
 
+		if end < start {
+			return nil, errors.New("invalid range header (end < start)")
+		}
 		return &link.Range{Start: start, End: end}, nil
 	}
 
+	strRange = strings.ReplaceAll(strRange, "[", "")
+	strRange = strings.ReplaceAll(strRange, "]", "")
+
 	parts := strings.Split(strRange, ",")
+
 	if len(parts) != 2 {
-		return nil, errors.New("invalid range header")
+		return nil, errors.New("invalid range header (len part)")
 	}
 
 	start, err = strconv.Atoi(parts[0])
 	if err != nil {
-		return nil, errors.New("invalid range header")
+		return nil, errors.New("invalid range header (atoi part one)")
 	}
 
 	end, err = strconv.Atoi(parts[1])
 	if err != nil {
-		return nil, errors.New("invalid range header")
+		return nil, errors.New("invalid range header (atoi part two)")
 	}
 
+	if end < start {
+		return nil, errors.New("invalid range header (end < start)")
+	}
 	return &link.Range{Start: start, End: end}, nil
 }

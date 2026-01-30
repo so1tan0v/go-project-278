@@ -1,0 +1,221 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: links-service
+meta:
+  id: wrk_f657fe3a986b4b71920905660ebb1e5d
+  created: 1769627169445
+  modified: 1769627209707
+  description: ""
+collection:
+  - url: "{{HOST}}/ping"
+    name: ping
+    meta:
+      id: req_3fec170cbd704e5eb8e9cb16db8ecb72
+      created: 1769627169450
+      modified: 1769627316892
+      isPrivate: false
+      description: ""
+      sortKey: -1769627169450
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/12.2.0
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - name: api
+    meta:
+      id: fld_9dd19314b6cf435a98f776db2e269dd6
+      created: 1769627181510
+      modified: 1769627181510
+      sortKey: -1769627181510
+      description: ""
+    children:
+      - url: "{{HOST}}/api/links"
+        name: get all links
+        meta:
+          id: req_7a9a5617ead142aab1820f6b8330da9c
+          created: 1769627345498
+          modified: 1769627374051
+          isPrivate: false
+          description: ""
+          sortKey: -1769627345498
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.2.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{HOST}}/api/links/1"
+        name: get link by id
+        meta:
+          id: req_32feff78fc864e0ebc0d4d30bb4be868
+          created: 1769627387039
+          modified: 1769627403609
+          isPrivate: false
+          description: ""
+          sortKey: -1769627387039
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.2.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{HOST}}/api/links"
+        name: add link
+        meta:
+          id: req_ef617eb4e5e643109b70c7ea99088fc4
+          created: 1769627413778
+          modified: 1769630189707
+          isPrivate: false
+          description: ""
+          sortKey: -1769627413778
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "original_url": "https://example.com/long-url",
+              "short_name": "exm23p3l23"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.2.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{HOST}}/api/links/1"
+        name: edit link
+        meta:
+          id: req_ead479baf59244109ed90a6f177ab19f
+          created: 1769627454436
+          modified: 1769627880092
+          isPrivate: false
+          description: ""
+          sortKey: -1769627454436
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "original_url": "https://example.com/long-url",
+              "short_name": "exmpl11111"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.2.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{HOST}}/api/links/1"
+        name: remove link
+        meta:
+          id: req_855ba0bdf6eb44189e1a5cb28f5f940a
+          created: 1769627527581
+          modified: 1769627551135
+          isPrivate: false
+          description: ""
+          sortKey: -1769627527581
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/12.2.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{HOST}}/api/links?range=1"
+        name: get all links with range
+        meta:
+          id: req_1f96abb9ddc14d06b49af4d14773d7b3
+          created: 1769629089161
+          modified: 1769630890318
+          isPrivate: false
+          description: ""
+          sortKey: -1769627257474
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.2.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_edab2d60f8d9703d1afbe6a2d909a53fbad62e8e
+    created: 1769627169447
+    modified: 1769627169447
+environments:
+  name: Base Environment
+  meta:
+    id: env_edab2d60f8d9703d1afbe6a2d909a53fbad62e8e
+    created: 1769627169447
+    modified: 1769627236293
+    isPrivate: false
+  data:
+    HOST: http://localhost:8080
+  subEnvironments:
+    - name: Production
+      meta:
+        id: env_ad4776a2b112473bb050f1bf23fce570
+        created: 1769628234279
+        modified: 1769628244622
+        isPrivate: false
+        sortKey: 1769628234279
+      data:
+        HOST: https://go-project-278-vr17.onrender.com/

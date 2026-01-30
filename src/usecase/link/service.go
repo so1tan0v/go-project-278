@@ -56,6 +56,11 @@ func (s *Service) ListWithRange(ctx context.Context, rng *domain.Range) ([]LinkD
 	return res, nil
 }
 
+/*Метод получения общего количества ссылок*/
+func (s *Service) Count(ctx context.Context) (int64, error) {
+	return s.repo.Count(ctx)
+}
+
 /*Метод получения ссылки по идентификатору*/
 func (s *Service) Get(ctx context.Context, id int64) (LinkDTO, error) {
 	l, err := s.repo.Get(ctx, id)

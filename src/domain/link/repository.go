@@ -12,6 +12,8 @@ type Repository interface {
 	List(ctx context.Context) ([]entity.Link, error)
 	/*Список ссылок с range*/
 	ListWithRange(ctx context.Context, rng *Range) ([]entity.Link, error)
+	/*Общее количество ссылок*/
+	Count(ctx context.Context) (int64, error)
 	/*Получение ссылки по идентификатору*/
 	Get(ctx context.Context, id int64) (entity.Link, error)
 	/*Создание ссылки*/

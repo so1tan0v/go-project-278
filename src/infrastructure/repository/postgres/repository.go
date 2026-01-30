@@ -14,12 +14,16 @@ import (
 
 /*Репозиторий для работы с PostgreSQL*/
 type Repository struct {
+	db *sql.DB
 	q *sqlcdb.Queries /*Queries для работы с базой данных*/
 }
 
 /*Метод создания нового репозитория*/
 func New(db *sql.DB) *Repository {
-	return &Repository{q: sqlcdb.New(db)}
+	return &Repository{
+		db: db,
+		q:  sqlcdb.New(db),
+	}
 }
 
 /*Метод получения списка ссылок*/
@@ -40,7 +44,7 @@ func (r *Repository) List(ctx context.Context) ([]entity.Link, error) {
 /*Метод получения списка ссылок*/
 func (r *Repository) ListWithRange(ctx context.Context, rng *domain.Range) ([]entity.Link, error) {
 	rows, err := r.q.ListLinksWithRange(ctx, sqlcdb.ListLinksWithRangeParams{
-		Limit:  int32(rng.End - rng.Start),
+		Limit:  int32(rng.End - rng.Start + 1),
 		Offset: int32(rng.Start),
 	})
 	if err != nil {
@@ -53,6 +57,15 @@ func (r *Repository) ListWithRange(ctx context.Context, rng *domain.Range) ([]en
 	}
 
 	return res, nil
+}
+
+/*Метод получения общего количества ссылок*/
+func (r *Repository) Count(ctx context.Context) (int64, error) {
+	var total int64
+	if err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM links`).Scan(&total); err != nil {
+		return 0, err
+	}
+	return total, nil
 }
 
 /*Метод получения ссылки по идентификатору*/

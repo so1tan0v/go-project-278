@@ -46,6 +46,9 @@ migrate-up:
 migrate-down:
 	go run github.com/pressly/goose/v3/cmd/goose@latest -dir $(MIGRATIONS_DIR) $(DB_TYPE) $(DATABASE_URL) down
 
+run-with-frontend:
+	npx concurrently "npx start-hexlet-url-shortener-frontend" "go run main.go"
+
 ## Docker targets
 docker-build:
 	docker build -t $(BINARY_NAME) .
