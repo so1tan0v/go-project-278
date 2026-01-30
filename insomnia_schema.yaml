@@ -153,7 +153,7 @@ collection:
         meta:
           id: req_855ba0bdf6eb44189e1a5cb28f5f940a
           created: 1769627527581
-          modified: 1769627551135
+          modified: 1769799156681
           isPrivate: false
           description: ""
           sortKey: -1769627527581
@@ -171,12 +171,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: "{{HOST}}/api/links?range=1"
+      - url: "{{HOST}}/api/links?range=[0,3]"
         name: get all links with range
         meta:
           id: req_1f96abb9ddc14d06b49af4d14773d7b3
           created: 1769629089161
-          modified: 1769630890318
+          modified: 1769796349998
           isPrivate: false
           description: ""
           sortKey: -1769627257474
@@ -184,6 +184,29 @@ collection:
         headers:
           - name: User-Agent
             value: insomnia/12.2.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{HOST}}/api/link_visits?range=%5B0%2C4%5D"
+        name: link_visits
+        meta:
+          id: req_02dba932b98f4a49b2dcf41e6353b063
+          created: 1769799110915
+          modified: 1769799175991
+          isPrivate: false
+          description: ""
+          sortKey: -1769627527681
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.0
             description: ""
             disabled: false
         settings:

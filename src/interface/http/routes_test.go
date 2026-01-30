@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -18,21 +19,37 @@ import (
 
 type stubLinkUC struct {
 	getByShortName func(ctx context.Context, shortName string) (linkusecase.LinkDTO, error)
+	create        func(ctx context.Context, in linkusecase.CreateInput) (linkusecase.LinkDTO, error)
+	update        func(ctx context.Context, id int64, in linkusecase.UpdateInput) (linkusecase.LinkDTO, error)
 }
 
-func (s stubLinkUC) List(ctx context.Context) ([]linkusecase.LinkDTO, error)               { return nil, nil }
+func (s stubLinkUC) List(ctx context.Context) ([]linkusecase.LinkDTO, error) { 
+	return nil, nil 
+}
 func (s stubLinkUC) ListWithRange(ctx context.Context, rng *link.Range) ([]linkusecase.LinkDTO, error) {
 	return nil, nil
 }
-func (s stubLinkUC) Count(ctx context.Context) (int64, error)                          { return 0, nil }
-func (s stubLinkUC) Get(ctx context.Context, id int64) (linkusecase.LinkDTO, error)    { return linkusecase.LinkDTO{}, nil }
+func (s stubLinkUC) Count(ctx context.Context) (int64, error) { 
+	return 0, nil 
+}
+func (s stubLinkUC) Get(ctx context.Context, id int64) (linkusecase.LinkDTO, error) { 
+	return linkusecase.LinkDTO{}, nil 
+}
 func (s stubLinkUC) Create(ctx context.Context, in linkusecase.CreateInput) (linkusecase.LinkDTO, error) {
+	if s.create != nil {
+		return s.create(ctx, in)
+	}
 	return linkusecase.LinkDTO{}, nil
 }
 func (s stubLinkUC) Update(ctx context.Context, id int64, in linkusecase.UpdateInput) (linkusecase.LinkDTO, error) {
+	if s.update != nil {
+		return s.update(ctx, id, in)
+	}
 	return linkusecase.LinkDTO{}, nil
 }
-func (s stubLinkUC) Delete(ctx context.Context, id int64) error { return nil }
+func (s stubLinkUC) Delete(ctx context.Context, id int64) error { 
+	return nil 
+}
 func (s stubLinkUC) GetByShortName(ctx context.Context, shortName string) (linkusecase.LinkDTO, error) {
 	return s.getByShortName(ctx, shortName)
 }
@@ -157,5 +174,110 @@ func TestLinkVisitsListPaginationSetsContentRange(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &got)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 11, len(got))
+}
+
+func TestCreateLinkValidationErrors(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	router := gin.New()
+
+	linkUC := stubLinkUC{
+		getByShortName: func(ctx context.Context, shortName string) (linkusecase.LinkDTO, error) {
+			return linkusecase.LinkDTO{}, nil
+		},
+		create: func(ctx context.Context, in linkusecase.CreateInput) (linkusecase.LinkDTO, error) {
+			return linkusecase.LinkDTO{}, nil
+		},
+	}
+	visitUC := stubVisitUC{
+		create: func(ctx context.Context, in linkvisitusecase.CreateInput) (linkvisitusecase.LinkVisitDTO, error) {
+			return linkvisitusecase.LinkVisitDTO{}, nil
+		},
+		listWithRange: func(ctx context.Context, rng *link.Range) ([]linkvisitusecase.LinkVisitDTO, error) {
+			return nil, nil
+		},
+		count: func(ctx context.Context) (int64, error) { return 0, nil },
+	}
+
+	InitRoutes(router, Deps{Link: linkUC, LinkVisit: visitUC})
+
+	{
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/api/links", strings.NewReader("{"))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	}
+
+	{
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/api/links", strings.NewReader(`{"original_url":"not-a-url"}`))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+
+		var body map[string]any
+		err := json.Unmarshal(w.Body.Bytes(), &body)
+		assert.Equal(t, nil, err)
+		errorsObj, ok := body["errors"].(map[string]any)
+		assert.Equal(t, true, ok)
+		_, ok = errorsObj["original_url"]
+		if !ok {
+			t.Logf("unexpected body: %s", w.Body.String())
+		}
+		assert.Equal(t, true, ok)
+	}
+
+	{
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/api/links", strings.NewReader(`{"original_url":"https://example.com","short_name":"ab"}`))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+
+		var body map[string]map[string]string
+		err := json.Unmarshal(w.Body.Bytes(), &body)
+		assert.Equal(t, nil, err)
+		_, ok := body["errors"]["short_name"]
+		assert.Equal(t, true, ok)
+	}
+}
+
+func TestCreateLinkShortNameConflictAsValidationError(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	router := gin.New()
+
+	linkUC := stubLinkUC{
+		getByShortName: func(ctx context.Context, shortName string) (linkusecase.LinkDTO, error) {
+			return linkusecase.LinkDTO{}, nil
+		},
+		create: func(ctx context.Context, in linkusecase.CreateInput) (linkusecase.LinkDTO, error) {
+			return linkusecase.LinkDTO{}, linkusecase.ErrShortNameConflict
+		},
+	}
+	visitUC := stubVisitUC{
+		create: func(ctx context.Context, in linkvisitusecase.CreateInput) (linkvisitusecase.LinkVisitDTO, error) {
+			return linkvisitusecase.LinkVisitDTO{}, nil
+		},
+		listWithRange: func(ctx context.Context, rng *link.Range) ([]linkvisitusecase.LinkVisitDTO, error) {
+			return nil, nil
+		},
+		count: func(ctx context.Context) (int64, error) { return 0, nil },
+	}
+
+	InitRoutes(router, Deps{Link: linkUC, LinkVisit: visitUC})
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/links", strings.NewReader(`{"original_url":"https://example.com","short_name":"abc"}`))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+
+	var body map[string]map[string]string
+	err := json.Unmarshal(w.Body.Bytes(), &body)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, "short name already in use", body["errors"]["short_name"])
 }
 

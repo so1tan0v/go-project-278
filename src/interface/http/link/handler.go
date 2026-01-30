@@ -1,7 +1,10 @@
 package link
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -9,6 +12,7 @@ import (
 	linkusecase "link-service/src/usecase/link"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 /*Хендлер для работы с ссылками*/
@@ -100,8 +104,7 @@ func (h *Handler) Get(c *gin.Context) {
 func (h *Handler) Create(c *gin.Context) {
 	var req CreateLinkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid body"})
-
+		writeBindError(c, err)
 		return
 	}
 
@@ -113,10 +116,14 @@ func (h *Handler) Create(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case linkusecase.ErrInvalidInput:
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"errors": gin.H{
+				"original_url": "invalid input",
+			}})
 			return
 		case linkusecase.ErrShortNameConflict:
-			c.JSON(http.StatusConflict, gin.H{"error": "short_name already exists"})
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"errors": gin.H{
+				"short_name": "short name already in use",
+			}})
 			return
 		default:
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
@@ -138,7 +145,7 @@ func (h *Handler) Update(c *gin.Context) {
 
 	var req UpdateLinkRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid body"})
+		writeBindError(c, err)
 
 		return
 	}
@@ -150,16 +157,24 @@ func (h *Handler) Update(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case linkusecase.ErrInvalidInput:
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"errors": gin.H{
+				"original_url": "invalid input",
+			}})
+
 			return
 		case linkusecase.ErrNotFound:
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+
 			return
 		case linkusecase.ErrShortNameConflict:
-			c.JSON(http.StatusConflict, gin.H{"error": "short_name already exists"})
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"errors": gin.H{
+				"short_name": "short name already in use",
+			}})
+
 			return
 		default:
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+
 			return
 		}
 	}
@@ -199,4 +214,61 @@ func mapToResponse(l linkusecase.LinkDTO) LinkResponse {
 		ShortName:   l.ShortName,
 		ShortURL:    l.ShortURL,
 	}
+}
+
+func writeBindError(c *gin.Context, err error) {
+	var syntaxErr *json.SyntaxError
+	var unmarshalTypeErr *json.UnmarshalTypeError
+
+	if errors.Is(err, io.EOF) || errors.As(err, &syntaxErr) || errors.As(err, &unmarshalTypeErr) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+
+		return
+	}
+
+	var ve validator.ValidationErrors
+	if errors.As(err, &ve) {
+		out := make(map[string]string, len(ve))
+
+		for _, fe := range ve {
+			out[toSnakeCase(fe.Field())] = fe.Error()
+		}
+
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"errors": out})
+
+		return
+	}
+
+	c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+}
+
+func toSnakeCase(s string) string {
+	if s == "" {
+		return s
+	}
+	var b []rune
+	runes := []rune(s)
+	for i, r := range runes {
+		if r >= 'A' && r <= 'Z' {
+			if i > 0 {
+				prev := runes[i-1]
+				var next rune
+				if i+1 < len(runes) {
+					next = runes[i+1]
+				}
+				prevIsLower := prev >= 'a' && prev <= 'z'
+				nextIsLower := next >= 'a' && next <= 'z'
+				if prevIsLower || nextIsLower {
+					b = append(b, '_')
+				}
+			}
+
+			b = append(b, r+('a'-'A'))
+
+			continue
+		}
+		b = append(b, r)
+	}
+
+	return string(b)
 }

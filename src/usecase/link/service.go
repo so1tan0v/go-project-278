@@ -123,7 +123,12 @@ func (s *Service) Update(ctx context.Context, id int64, in UpdateInput) (LinkDTO
 
 	shortName := strings.TrimSpace(in.ShortName)
 	if shortName == "" {
-		return LinkDTO{}, ErrInvalidInput
+		existing, err := s.repo.Get(ctx, id)
+		if err != nil {
+			return LinkDTO{}, mapDomainError(err)
+		}
+
+		shortName = existing.ShortName
 	}
 
 	l, err := s.repo.Update(ctx, id, in.OriginalURL, shortName)

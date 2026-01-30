@@ -10,12 +10,12 @@ type LinkResponse struct {
 
 /*DTO для создания ссылки.*/
 type CreateLinkRequest struct {
-	OriginalURL string `json:"original_url"` /*Исходная ссылка*/
-	ShortName   string `json:"short_name"`   /*Короткая ссылка*/
+	OriginalURL string `json:"original_url" binding:"required,url"`      /*Исходная ссылка*/
+	ShortName   string `json:"short_name" binding:"omitempty,min=3,max=32"` /*Короткая ссылка*/
 }
 
 /*DTO для обновления ссылки.*/
 type UpdateLinkRequest struct {
-	OriginalURL string `json:"original_url"` /*Исходная ссылка*/
-	ShortName   string `json:"short_name"`   /*Короткая ссылка*/
+	OriginalURL string `json:"original_url" binding:"required,url"`      /*Исходная ссылка*/
+	ShortName   string `json:"short_name" binding:"omitempty,min=3,max=32"` /*Короткая ссылка*/
 }
