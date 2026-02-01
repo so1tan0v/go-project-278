@@ -42,7 +42,7 @@ func initAppConfig() *configDomain.AppConfig {
 	development = os.Getenv("DEVELOPMENT") == "true"
 	host = os.Getenv("HOST")
 	if host == "" {
-		host = "localhost"
+		host = "0.0.0.0"
 	}
 
 	port, _ = strconv.Atoi(os.Getenv("PORT"))
