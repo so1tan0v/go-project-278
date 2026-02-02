@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	configDomain "link-service/src/domain/config"
 	"os"
@@ -51,6 +52,19 @@ func initAppConfig() *configDomain.AppConfig {
 	}
 	loggingIO = os.Getenv("LOGGING_IO") == "true"
 
+	aoStr := os.Getenv("ALLOWED_ORIGINS")
+	var aoList []string
+	var err error
+	if aoStr == "" {
+		aoList = []string{}
+	} else {
+		err = json.Unmarshal([]byte(aoStr), &aoList)
+		if err != nil {
+			aoList = []string{}
+		}
+
+	}
+
 	return &configDomain.AppConfig{
 		Development: development,
 		Port:        port,
@@ -64,6 +78,7 @@ func initAppConfig() *configDomain.AppConfig {
 
 			return fmt.Sprintf("http://%s:%d", host, port)
 		}(),
+		AllowedOrigins: aoList,
 	}
 }
 

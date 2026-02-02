@@ -7,4 +7,5 @@ type AppConfig struct {
 	Host        string /*Хост*/
 	LoggingIO   bool   /*Логирование*/
 	BaseURL     string /*Базовый URL*/
+	AllowedOrigins []string /*Разрешенные Origin*/
 }
