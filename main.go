@@ -66,14 +66,7 @@ func main() {
 	linkVisitRepo := postgreslinkrepo.NewLinkVisitRepository(sqlDB)
 	linkVisitService := linkvisitusecase.NewService(linkVisitRepo)
 
-	if cnf.App.Development {
-		httpServer.Use(gin.Recovery())
-
-		jsonData, _ := json.Marshal(cnf)
-
-		fmt.Println(string(jsonData))
-	}
-
+	httpServer.Use(gin.Recovery())
 	httpinterface.InitRoutes(httpServer, httpinterface.Deps{
 		Link:      linkService,
 		LinkVisit: linkVisitService,

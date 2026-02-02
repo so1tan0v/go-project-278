@@ -23,7 +23,6 @@ func NewHandler(useCase linkvisitusecase.UseCase) *Handler {
 /*Метод получения списка посещений*/
 func (h *Handler) List(c *gin.Context) {
 	rngString := c.Query("range")
-	fmt.Println("rngString", rngString)
 	var (
 		rng *link.Range
 		res []linkvisitusecase.LinkVisitDTO

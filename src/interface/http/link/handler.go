@@ -79,8 +79,6 @@ func (h *Handler) List(c *gin.Context) {
 
 /*Метод получения ссылки по идентификатору*/
 func (h *Handler) Get(c *gin.Context) {
-	fmt.Println("Get", c.Param("id"))
-
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil || id <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
