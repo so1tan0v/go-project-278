@@ -53,14 +53,17 @@ func initAppConfig() *configDomain.AppConfig {
 	loggingIO = os.Getenv("LOGGING_IO") == "true"
 
 	aoStr := os.Getenv("ALLOWED_ORIGINS")
+
 	var aoList []string
 	var err error
+	defaultAOList := []string{"*"}
+
 	if aoStr == "" {
-		aoList = []string{}
+		aoList = defaultAOList
 	} else {
 		err = json.Unmarshal([]byte(aoStr), &aoList)
 		if err != nil {
-			aoList = []string{}
+			aoList = defaultAOList
 		}
 
 	}
