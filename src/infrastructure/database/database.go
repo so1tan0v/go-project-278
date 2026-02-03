@@ -34,7 +34,7 @@ func (d *DatabaseImpl) Connect(config configDomain.DatabaseConfig) error {
 	d.instance = db
 
 	if d.loggingIO {
-		fmt.Errorf("Database connected successfully")
+		fmt.Println("Database connected successfully")
 	}
 
 	return nil
@@ -53,7 +53,7 @@ func (d *DatabaseImpl) Disconnect() error {
 
 	err := d.instance.Close()
 	if d.loggingIO {
-		fmt.Errorf("Database disconnected successfully")
+		fmt.Println("Database disconnected successfully")
 	}
 
 	return err
