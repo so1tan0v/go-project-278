@@ -1,4 +1,4 @@
-# 1) Build frontend
+# Build frontend
 FROM node:24-alpine AS frontend-builder
 WORKDIR /build/frontend
 
@@ -7,7 +7,7 @@ COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
   npm ci --prefer-offline --no-audit
 
-# 2) Build backend
+# Build backend
 FROM golang:1.25-alpine AS backend-builder
 RUN apk add --no-cache git
 WORKDIR /build/code
@@ -23,7 +23,7 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
   CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /build/app .
 
-# 3) Runtime
+# Runtime
 FROM alpine:3.22
 
 RUN apk add --no-cache ca-certificates tzdata bash caddy
